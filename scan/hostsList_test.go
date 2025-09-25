@@ -147,7 +147,7 @@ func TestHostsList_LoadNoFile(t *testing.T) {
 		t.Fatalf("Error deleting temp file: %s", err)
 	}
 
-	hosts := scan.HostsList{}
+	hosts := &scan.HostsList{}
 
 	if err := hosts.Load(tempFile.Name()); err != nil {
 		t.Errorf("Expected no error, got %q instead\n", err)
