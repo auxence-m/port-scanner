@@ -18,11 +18,6 @@ var listCmd = &cobra.Command{
 }
 
 func listRun(cmd *cobra.Command, args []string) error {
-	hostFile, err := cmd.Flags().GetString("hosts-file")
-	if err != nil {
-		return err
-	}
-
 	return listAction(os.Stdout, hostFile, args)
 }
 

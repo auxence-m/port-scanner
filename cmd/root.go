@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var hostFile string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "pScan",
@@ -28,6 +30,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringP("hosts-file", "f", "pScan.hosts", "pScan hosts file")
+	rootCmd.PersistentFlags().StringVarP(&hostFile, "hosts-file", "f", "pScan.hosts", "pScan hosts file")
 	rootCmd.SetVersionTemplate(`{{printf "%s : %s - version %s\n" .Name .Short .Version}}`)
 }

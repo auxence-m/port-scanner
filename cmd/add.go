@@ -20,11 +20,6 @@ var addCmd = &cobra.Command{
 }
 
 func addRun(cmd *cobra.Command, args []string) error {
-	hostFile, err := cmd.Flags().GetString("hosts-file")
-	if err != nil {
-		return err
-	}
-
 	return addAction(os.Stdout, hostFile, args)
 }
 

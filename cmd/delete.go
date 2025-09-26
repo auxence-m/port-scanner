@@ -20,11 +20,6 @@ var deleteCmd = &cobra.Command{
 }
 
 func deleteRun(cmd *cobra.Command, args []string) error {
-	hostFile, err := cmd.Flags().GetString("hosts-file")
-	if err != nil {
-		return err
-	}
-
 	return deleteAction(os.Stdout, hostFile, args)
 }
 
