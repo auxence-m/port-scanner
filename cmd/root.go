@@ -1,12 +1,17 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var hostFile string
+var hostsFileFlag string
+var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -30,6 +35,44 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&hostFile, "hosts-file", "f", "pScan.hosts", "pScan hosts file")
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
+	rootCmd.PersistentFlags().StringVarP(&hostsFileFlag, "hosts-file", "f", "pScan.hosts", "pScan hosts file")
 	rootCmd.SetVersionTemplate(`{{printf "%s : %s - version %s\n" .Name .Short .Version}}`)
+
+	replacer := strings.NewReplacer("-", "_")
+	viper.SetEnvKeyReplacer(replacer)
+	viper.SetEnvPrefix("PSCAN")
+
+	err := viper.BindPFlag("hosts-file", rootCmd.PersistentFlags().Lookup("hosts-file"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		// Search config in home directory with name ".pScan" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".pScan")
+	}
+
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"pScan/scan"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var scannedPorts []int
@@ -19,7 +20,9 @@ var scanCmd = &cobra.Command{
 }
 
 func scanRun(cmd *cobra.Command, args []string) error {
-	return scanAction(os.Stdout, hostFile, scannedPorts)
+	hostsFile := viper.GetString("hosts-file")
+
+	return scanAction(os.Stdout, hostsFile, scannedPorts)
 }
 
 func scanAction(out io.Writer, file string, ports []int) error {

@@ -7,6 +7,7 @@ import (
 	"pScan/scan"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // listCmd represents the list command
@@ -18,7 +19,9 @@ var listCmd = &cobra.Command{
 }
 
 func listRun(cmd *cobra.Command, args []string) error {
-	return listAction(os.Stdout, hostFile, args)
+	hostsFile := viper.GetString("hosts-file")
+
+	return listAction(os.Stdout, hostsFile, args)
 }
 
 func listAction(out io.Writer, file string, args []string) error {

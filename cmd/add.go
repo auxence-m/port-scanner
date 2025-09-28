@@ -7,6 +7,7 @@ import (
 	"pScan/scan"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // addCmd represents the add command
@@ -20,7 +21,9 @@ var addCmd = &cobra.Command{
 }
 
 func addRun(cmd *cobra.Command, args []string) error {
-	return addAction(os.Stdout, hostFile, args)
+	hostsFile := viper.GetString("hosts-file")
+
+	return addAction(os.Stdout, hostsFile, args)
 }
 
 func addAction(out io.Writer, file string, args []string) error {
