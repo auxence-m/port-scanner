@@ -46,6 +46,12 @@ func scanRun(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	for _, port := range scannedPorts {
+		if port < 1 || port > 65535 {
+			return fmt.Errorf("port %d is out of range [1-65535]", port)
+		}
+	}
+
 	return scanAction(os.Stdout, hostsFile, scannedPorts)
 }
 
