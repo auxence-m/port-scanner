@@ -63,7 +63,7 @@ func TestRunHost_Found(t *testing.T) {
 		}
 	}
 
-	result := scan.Run(hosts, ports)
+	result := scan.Run(hosts, ports, "tcp")
 
 	// There should be only one element in the Results slice returned
 	// Verify results for HostFound test
@@ -101,7 +101,7 @@ func TestRunHost_NotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result := scan.Run(hosts, []int{})
+	result := scan.Run(hosts, []int{}, "tcp")
 
 	// Verify results for HostNotFound test
 	if len(result) != 1 {

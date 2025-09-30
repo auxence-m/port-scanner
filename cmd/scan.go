@@ -14,6 +14,7 @@ import (
 
 var scannedPorts []int
 var portRange string
+var udp bool
 
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
@@ -26,6 +27,12 @@ var scanCmd = &cobra.Command{
 func scanRun(cmd *cobra.Command, args []string) error {
 	hostsFile := viper.GetString("hosts-file")
 
+	// When performing a UDP port scan, change default ports to well known UDP ports
+	if udp {
+		scannedPorts = []int{53, 67, 68, 123, 135, 161}
+	}
+
+	// Verifying provided port range format
 	if portRange != "" {
 		rangeStr := strings.Split(portRange, "-")
 		if len(rangeStr) != 2 {
@@ -57,12 +64,17 @@ func scanRun(cmd *cobra.Command, args []string) error {
 
 func scanAction(out io.Writer, file string, ports []int) error {
 	hosts := &scan.HostsList{}
+	results := make([]scan.Results, 0, len(hosts.Hosts))
 
 	if err := hosts.Load(file); err != nil {
 		return err
 	}
 
-	results := scan.Run(hosts, ports)
+	if udp {
+		results = scan.Run(hosts, ports, "udp")
+	} else {
+		results = scan.Run(hosts, ports, "tcp")
+	}
 
 	return printResults(out, results)
 }
@@ -93,6 +105,7 @@ func printResults(out io.Writer, results []scan.Results) error {
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
-	scanCmd.Flags().IntSliceVarP(&scannedPorts, "ports", "p", []int{22, 80, 443}, "ports to scan")
+	scanCmd.Flags().IntSliceVarP(&scannedPorts, "ports", "p", []int{21, 22, 25, 80, 443}, "ports to scan")
 	scanCmd.Flags().StringVarP(&portRange, "range", "r", "", "port range to scan")
+	scanCmd.Flags().BoolVar(&udp, "udp", false, "enable UDP port scans")
 }

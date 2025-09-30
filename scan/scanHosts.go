@@ -23,8 +23,8 @@ func (s state) String() string {
 	return "closed"
 }
 
-// scanPort performs a port scan on a single TCP port
-func scanPort(host string, port int) PortState {
+// scanPortTCP performs a port scan on a single TCP port
+func scanPortTCP(host string, port int) PortState {
 	portState := PortState{
 		Port: port,
 	}
@@ -47,6 +47,30 @@ func scanPort(host string, port int) PortState {
 	return portState
 }
 
+// scanPortUDP performs a port scan on a single UDP port
+func scanPortUDP(host string, port int) PortState {
+	portState := PortState{
+		Port: port,
+	}
+
+	// define the network address based on the host and port
+	address := net.JoinHostPort(host, fmt.Sprintf("%d", port))
+
+	// define the network address based on the host and port
+	scanConn, err := net.DialTimeout("udp", address, 1*time.Second)
+	if err != nil {
+		return portState
+	}
+
+	err = scanConn.Close()
+	if err != nil {
+		return portState
+	}
+
+	portState.Open = true
+	return portState
+}
+
 // Results represents the scan results for a single host
 type Results struct {
 	Host       string
@@ -55,7 +79,7 @@ type Results struct {
 }
 
 // Run performs a port scan on the hosts list
-func Run(hosts *HostsList, ports []int) []Results {
+func Run(hosts *HostsList, ports []int, protocol string) []Results {
 	results := make([]Results, 0, len(hosts.Hosts))
 
 	// for every host
@@ -72,8 +96,16 @@ func Run(hosts *HostsList, ports []int) []Results {
 		}
 
 		// scan ports for the given IP address
-		for _, port := range ports {
-			res.PortStates = append(res.PortStates, scanPort(host, port))
+		if protocol == "tcp" {
+			for _, port := range ports {
+				res.PortStates = append(res.PortStates, scanPortTCP(host, port))
+			}
+		}
+
+		if protocol == "udp" {
+			for _, port := range ports {
+				res.PortStates = append(res.PortStates, scanPortUDP(host, port))
+			}
 		}
 
 		results = append(results, res)
