@@ -7,6 +7,7 @@ import (
 	"pScan/scan"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -65,6 +66,7 @@ func scanRun(cmd *cobra.Command, args []string) error {
 func scanAction(out io.Writer, file string, ports []int) error {
 	hosts := &scan.HostsList{}
 	results := make([]scan.Results, 0, len(hosts.Hosts))
+	protocol := "tcp"
 
 	if err := hosts.Load(file); err != nil {
 		return err
@@ -72,34 +74,37 @@ func scanAction(out io.Writer, file string, ports []int) error {
 
 	if udp {
 		results = scan.Run(hosts, ports, "udp")
+		protocol = "udp"
 	} else {
 		results = scan.Run(hosts, ports, "tcp")
 	}
 
-	return printResults(out, results)
+	return printResults(out, results, protocol)
 }
 
-func printResults(out io.Writer, results []scan.Results) error {
+func printResults(out io.Writer, results []scan.Results, protocol string) error {
 	message := ""
+	w := tabwriter.NewWriter(out, 0, 0, 5, ' ', 0)
 
 	for _, res := range results {
-		message += fmt.Sprintf("%s:", res.Host)
+		message += fmt.Sprintf("Scan report for %s:", res.Host)
 
 		if res.NotFound {
-			message += fmt.Sprintf(" Host not found\n\n")
+			message += fmt.Sprintf(" Host Not Found\n\n")
 			continue
 		}
 
 		message += fmt.Sprintln()
+		message += fmt.Sprintln("PORT\tSTATE")
 
 		for _, port := range res.PortStates {
-			message += fmt.Sprintf("\t%d: %s\n", port.Port, port.Open)
+			message += fmt.Sprintf("%d/%s\t%s\n", port.Port, protocol, port.Open)
 		}
 
 		message += fmt.Sprintln()
 	}
 
-	_, err := fmt.Fprint(out, message)
+	_, err := fmt.Fprintln(w, message)
 	return err
 }
 
