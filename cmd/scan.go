@@ -16,6 +16,7 @@ import (
 var scannedPorts []int
 var portRange string
 var udp bool
+var open bool
 
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
@@ -98,7 +99,13 @@ func printResults(out io.Writer, results []scan.Results, protocol string) error 
 		message += fmt.Sprintln("PORT\tSTATE")
 
 		for _, port := range res.PortStates {
-			message += fmt.Sprintf("%d/%s\t%s\n", port.Port, protocol, port.Open)
+			if open {
+				if port.Open {
+					message += fmt.Sprintf("%d/%s\t%s\n", port.Port, protocol, port.Open)
+				}
+			} else {
+				message += fmt.Sprintf("%d/%s\t%s\n", port.Port, protocol, port.Open)
+			}
 		}
 
 		message += fmt.Sprintln()
@@ -113,4 +120,5 @@ func init() {
 	scanCmd.Flags().IntSliceVarP(&scannedPorts, "ports", "p", []int{21, 22, 25, 80, 443}, "ports to scan")
 	scanCmd.Flags().StringVarP(&portRange, "range", "r", "", "port range to scan")
 	scanCmd.Flags().BoolVar(&udp, "udp", false, "enable UDP port scans")
+	scanCmd.Flags().BoolVar(&open, "open", false, "show only open ports")
 }
