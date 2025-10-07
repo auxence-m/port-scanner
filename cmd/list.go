@@ -16,6 +16,13 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"l"},
 	Short:   "List hosts in hosts list",
 	RunE:    listRun,
+	Example: `  
+# To list all the hosts
+pScan hosts list
+
+# To list all the hosts from a specific host file
+pScan hosts delete 192.168.0.199 192.168.0.56 --host-file file.hosts
+`,
 }
 
 func listRun(cmd *cobra.Command, args []string) error {

@@ -24,6 +24,25 @@ var scanCmd = &cobra.Command{
 	Short:        "Run a port scan on the hosts",
 	SilenceUsage: true,
 	RunE:         scanRun,
+	Example: `
+# To scan a one or multiple TCP ports
+pScan scan --ports 80,135,445,139,50477,54672,59869
+
+# To scan TCP ports within a specific range
+pScan scan --range 59860-59890
+
+# To scan a one or multiple UDP ports
+pScan scan --udp --ports 53,67,163,56448,57674
+
+# To scan UDP ports within a specific range
+pScan scan --udp --range 59860-59890
+
+# To show only open port
+pScan scan --ports 80,135,445,139,50477,54672,59869 --open
+
+# To combine multiple scan options
+pScan scan --ports 80,135,445,139,50477,54672,59869 --range 59860-59890 --open
+`,
 }
 
 func scanRun(cmd *cobra.Command, args []string) error {
@@ -31,7 +50,7 @@ func scanRun(cmd *cobra.Command, args []string) error {
 
 	// When performing a UDP port scan, change default ports to well known UDP ports
 	if udp {
-		scannedPorts = []int{53, 67, 68, 123, 135, 161}
+		scannedPorts = []int{53, 67, 68, 123, 135}
 	}
 
 	// Verifying provided port range format
@@ -48,6 +67,10 @@ func scanRun(cmd *cobra.Command, args []string) error {
 		end, err := strconv.Atoi(rangeStr[1])
 		if err != nil {
 			return err
+		}
+
+		if start > end {
+			return fmt.Errorf("invalid port range [%d-%d]", start, end)
 		}
 
 		for i := start; i <= end; i++ {

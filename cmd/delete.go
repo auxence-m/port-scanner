@@ -18,6 +18,16 @@ var deleteCmd = &cobra.Command{
 	SilenceUsage: true,
 	Short:        "Delete hosts(s) from list",
 	RunE:         deleteRun,
+	Example: `  
+# To delete a new host
+pScan hosts delete 192.168.0.199
+
+# To delete multiple hosts
+pScan hosts delete 192.168.0.199 192.168.0.56
+
+# To delete host(s) from a specific host file
+pScan hosts delete 192.168.0.199 192.168.0.56 --host-file file.hosts
+`,
 }
 
 func deleteRun(cmd *cobra.Command, args []string) error {
