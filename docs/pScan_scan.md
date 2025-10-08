@@ -10,13 +10,13 @@ pScan scan [flags]
 
 ```
 
-# To scan a one or multiple TCP ports
+# To scan one or multiple TCP ports
 pScan scan --ports 80,135,445,139,50477,54672,59869
 
 # To scan TCP ports within a specific range
 pScan scan --range 59860-59890
 
-# To scan a one or multiple UDP ports
+# To scan one or multiple UDP ports
 pScan scan --udp --ports 53,67,163,56448,57674
 
 # To scan UDP ports within a specific range
