@@ -23,8 +23,8 @@ on a list of hosts.
 
 pScan allows you to add, list, and delete hosts from the list.
 
-pScan executes a port scan on specified TCP ports. You can customize the
-target ports using a command line flag.`,
+pScan executes a port scan on specified TCP or UDP ports. You can customize the
+target ports and the scan output using a command line flag.`,
 }
 
 func Execute() {
