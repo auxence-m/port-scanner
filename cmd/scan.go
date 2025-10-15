@@ -18,10 +18,10 @@ var portRange string
 var udp bool
 var open bool
 
-// Top 20 (most commonly opened) TCP ports
+// Top 20 most commonly opened TCP ports (https://nmap.org/book/port-scanning.html#most-popular-ports)
 var tcpPorts = []int{80, 23, 443, 21, 22, 25, 3389, 110, 445, 139, 143, 53, 135, 3306, 8080, 1723, 111, 995, 993, 5900}
 
-// Top 20 (most commonly opened) UDP ports
+// Top 20 most commonly opened UDP ports (https://nmap.org/book/port-scanning.html#most-popular-ports)
 var udpPorts = []int{631, 161, 137, 123, 138, 1434, 445, 135, 67, 53, 139, 500, 68, 520, 1900, 4500, 514, 49152, 162, 69}
 
 // scanCmd represents the scan command
@@ -47,7 +47,7 @@ pScan scan --udp --range 59860-59890
 pScan scan --ports 80,135,445,139,50477,54672,59869 --open
 
 # To combine multiple scan options
-pScan scan --ports 80,135,445,139,50477,54672,59869 --range 59860-59890 --open
+pScan scan --ports 80,135,445,139,50477,54672 --range 59860-59890 --open
 `,
 }
 
@@ -56,31 +56,22 @@ func scanRun(cmd *cobra.Command, args []string) error {
 
 	// When performing a UDP port scan, change default ports to well known UDP ports
 	if udp {
-		scannedPorts = []int{53, 67, 68, 123, 135}
+		scannedPorts = udpPorts
+	}
+
+	portsIsSet := cmd.Flag("ports").Changed
+	rangeIsSet := cmd.Flag("range").Changed
+
+	// Only scan the ports provided in the range flag when it is the only one that is set
+	// Essentially removing the default ports before adding the ports provided in the range to the scannedPorts slice
+	if !portsIsSet && rangeIsSet {
+		scannedPorts = nil
 	}
 
 	// Validates the provided port range format
 	if portRange != "" {
-		rangeStr := strings.Split(portRange, "-")
-		if len(rangeStr) != 2 {
-			return fmt.Errorf("parsing \"%s\": invalid port range format", portRange)
-		}
-
-		start, err := strconv.Atoi(rangeStr[0])
-		if err != nil {
+		if err := validatePortRange(portRange); err != nil {
 			return err
-		}
-		end, err := strconv.Atoi(rangeStr[1])
-		if err != nil {
-			return err
-		}
-
-		if start > end {
-			return fmt.Errorf("invalid port range [%d-%d]", start, end)
-		}
-
-		for i := start; i <= end; i++ {
-			scannedPorts = append(scannedPorts, i)
 		}
 	}
 
@@ -145,9 +136,36 @@ func printResults(out io.Writer, results []scan.Results, protocol string) error 
 	return err
 }
 
+func validatePortRange(portRange string) error {
+	rangeStr := strings.Split(portRange, "-")
+
+	if len(rangeStr) != 2 {
+		return fmt.Errorf("parsing \"%s\": invalid port range format", portRange)
+	}
+
+	start, err := strconv.Atoi(rangeStr[0])
+	if err != nil {
+		return err
+	}
+	end, err := strconv.Atoi(rangeStr[1])
+	if err != nil {
+		return err
+	}
+
+	if start > end {
+		return fmt.Errorf("invalid port range [%d-%d]", start, end)
+	}
+
+	for i := start; i <= end; i++ {
+		scannedPorts = append(scannedPorts, i)
+	}
+
+	return nil
+}
+
 func init() {
 	rootCmd.AddCommand(scanCmd)
-	scanCmd.Flags().IntSliceVarP(&scannedPorts, "ports", "p", []int{21, 22, 25, 80, 443}, "ports to scan")
+	scanCmd.Flags().IntSliceVarP(&scannedPorts, "ports", "p", tcpPorts, "ports to scan")
 	scanCmd.Flags().StringVarP(&portRange, "range", "r", "", "port range to scan")
 	scanCmd.Flags().BoolVar(&udp, "udp", false, "enable UDP port scans")
 	scanCmd.Flags().BoolVar(&open, "open", false, "show only open ports")

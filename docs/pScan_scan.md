@@ -26,7 +26,7 @@ pScan scan --udp --range 59860-59890
 pScan scan --ports 80,135,445,139,50477,54672,59869 --open
 
 # To combine multiple scan options
-pScan scan --ports 80,135,445,139,50477,54672,59869 --range 59860-59890 --open
+pScan scan --ports 80,135,445,139,50477,54672 --range 59860-59890 --open
 
 ```
 
@@ -35,7 +35,7 @@ pScan scan --ports 80,135,445,139,50477,54672,59869 --range 59860-59890 --open
 ```
   -h, --help           help for scan
       --open           show only open ports
-  -p, --ports ints     ports to scan (default [21,22,25,80,443])
+  -p, --ports ints     ports to scan (default [80,23,443,21,22,25,3389,110,445,139,143,53,135,3306,8080,1723,111,995,993,5900])
   -r, --range string   port range to scan
       --udp            enable UDP port scans
 ```
