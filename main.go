@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"pScan/cmd"
 
 	"github.com/charmbracelet/fang"
@@ -14,12 +13,13 @@ func main() {
 	//cmd.Execute()
 
 	rootCmd := cmd.Root()
-	err := doc.GenMarkdownTree(rootCmd, "./docs")
-	if err != nil {
+
+	if err := fang.Execute(context.Background(), rootCmd, fang.WithoutManpage(), fang.WithVersion(rootCmd.Version)); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := fang.Execute(context.Background(), rootCmd, fang.WithoutManpage(), fang.WithVersion(rootCmd.Version)); err != nil {
-		os.Exit(1)
+	err := doc.GenMarkdownTree(rootCmd, "./docs")
+	if err != nil {
+		log.Fatal(err)
 	}
 }

@@ -18,6 +18,12 @@ var portRange string
 var udp bool
 var open bool
 
+// Top 20 (most commonly opened) TCP ports
+var tcpPorts = []int{80, 23, 443, 21, 22, 25, 3389, 110, 445, 139, 143, 53, 135, 3306, 8080, 1723, 111, 995, 993, 5900}
+
+// Top 20 (most commonly opened) UDP ports
+var udpPorts = []int{631, 161, 137, 123, 138, 1434, 445, 135, 67, 53, 139, 500, 68, 520, 1900, 4500, 514, 49152, 162, 69}
+
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
 	Use:          "scan",
@@ -53,7 +59,7 @@ func scanRun(cmd *cobra.Command, args []string) error {
 		scannedPorts = []int{53, 67, 68, 123, 135}
 	}
 
-	// Verifying provided port range format
+	// Validates the provided port range format
 	if portRange != "" {
 		rangeStr := strings.Split(portRange, "-")
 		if len(rangeStr) != 2 {
@@ -78,6 +84,7 @@ func scanRun(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Validates the provided port numbers are within the proper range for TCP ports from 1 to 65535
 	for _, port := range scannedPorts {
 		if port < 1 || port > 65535 {
 			return fmt.Errorf("port %d is out of range [1-65535]", port)
